@@ -1,0 +1,5 @@
+gravemanager.3dsx
+gravemanager.smdh
+gravemanager.elf
+build/*
+.vscode/*
