@@ -9,6 +9,7 @@
 #define ERROR_BUF_SIZE 256
 #define DISPLAY_MAX_SIZE 256
 #define BUTTON_MAX_STRLEN 12
+#define ACTIONTEXT_MAX_SIZE 2048
 
 bool menu_shouldExit();
 void menu_init();

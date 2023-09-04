@@ -4,8 +4,7 @@ enum mainstates {
     STATE_FIRST,
     STATE_PREP,
     STATE_INITIAL,
-    STATE_FIRST_LAUNCH1,
-    STATE_FIRST_LAUNCH2,
+    STATE_FIRST_LAUNCH,
     STATE_DISPLAY_BOX,
     STATE_EXIT
 };
@@ -20,12 +19,15 @@ struct boxState {
     char b2[BUTTON_MAX_STRLEN];
 };
 
-static int state = STATE_PREP;
+static int state = STATE_FIRST;
 static DrawContext ctx;
 bool shouldExit = false;
 struct boxState curbox;
 touchPosition touch;
 Button ret1, ret2;
+int stateprogress = 0;
+char actionText[ACTIONTEXT_MAX_SIZE] = {};
+int retstate = 0;
 
 void errorDisplay(const char* format, ...) {
     char buffer[ERROR_BUF_SIZE];
@@ -40,8 +42,8 @@ void menu_init() {
     initUI();
     initContext(&ctx);
     initColors(&ctx);
-    newButton(&ret1, 0+1, 200+1, 0, 160-2, 40-2, "OK", 0.0f, ctx.clrWhite, ctx.clrBgBright, 1.0f);
-    newButton(&ret2, 160+1, 200+1, 0, 160-2, 40-2, "OK", 0.0f, ctx.clrWhite, ctx.clrBgBright, 1.0f);
+    newButton(&ret1, 0+1, 200+1, 0, 160-2, 40-2, "OK", 0.0f, ctx.clrWhite, ctx.clrBgBright, 0.7f);
+    newButton(&ret2, 160+1, 200+1, 0, 160-2, 40-2, "OK", 0.0f, ctx.clrWhite, ctx.clrBgBright, 0.7f);
 }
 
 void menu_exit() {
@@ -56,14 +58,17 @@ bool menu_shouldExit() {
 static void drawMenuTop() {
     switch(state) {
         case STATE_PREP:
-            drawTextCentered(200.0f, 105.0f, 0.0f, 1.0f, ctx.clrWhite, "Preparing...");
+        case STATE_FIRST:
+        case STATE_FIRST_LAUNCH:
+        case STATE_DISPLAY_BOX:
+            drawTextCentered(200.0f, 105.0f, 0.0f, 1.0f, ctx.clrWhite, actionText);
     }
 }
 
 static void drawMenuBottom() {
     switch(state) {
         case STATE_DISPLAY_BOX:
-            drawTextCentered(SCREEN_WIDTH_BOTTOM/2, 20, 0, 1.0f, ctx.clrWhite, curbox.text);
+            drawTextCentered(SCREEN_WIDTH_BOTTOM/2, 20, 0, 0.5f, ctx.clrWhite, curbox.text);
             drawButton(&ret1);
             drawButton(&ret2);
     }
@@ -84,19 +89,29 @@ void menu_update() {
     switch(state) {
         case STATE_FIRST:
             state = STATE_PREP;
+            snprintf(actionText, ACTIONTEXT_MAX_SIZE, "Preparing");
             break;
         case STATE_PREP:
             if (sd_fileExists("/gravemanager/config.json")) {
                 state = STATE_INITIAL;
             } else {
-                state = STATE_FIRST_LAUNCH1;
+                state = STATE_FIRST_LAUNCH;
             }
             break;
-        case STATE_FIRST_LAUNCH1:
-            setBoxStruct(STATE_FIRST_LAUNCH2, STATE_EXIT, "Preparing for first launch", true, "OK", "get me out");
-            state = STATE_DISPLAY_BOX;
+        case STATE_FIRST_LAUNCH:
+            switch(stateprogress) {
+                case 0:
+                    setBoxStruct(STATE_FIRST_LAUNCH, STATE_EXIT, "Prepare for first launch?", true, "Sure", "Get me out");
+                    state = STATE_DISPLAY_BOX;
+                    stateprogress = 1;
+                    break;
+                case 1:
+                    setBox
+
+
+            }
             break;
-        case STATE_FIRST_LAUNCH2:
+
         case STATE_DISPLAY_BOX:
             changeButtonString(&ret1, curbox.b1);
             changeButtonString(&ret2, curbox.b2);
